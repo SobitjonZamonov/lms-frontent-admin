@@ -60,13 +60,13 @@ const SidebarLayout = () => {
                 navigate('/teachers');
                 break;
             case '4':
-                // navigate('/groups');
+                navigate('/groups');
                 break;
             case '7':
-                // navigate('/settings');
+                navigate('/settings');
                 break;
             case '8':
-                navigate('/login'); // yoki logout logikasi
+                navigate('/login');
                 break;
             default:
                 break;

@@ -1,29 +1,19 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+// import { create } from "zustand";
+// import { IAuthStoreData, IUser } from "@/utils/index";
+// import Cookie from "js-cookie";
 
-interface DataT {
-  user: UserT;
-  token: string | null;
-  setUser: (user: UserT) => void;
-  setToken: (token: string) => void;
-}
-interface UserT {
-  full_name?: string;
-  username?: string;
-  role?: string;
-  user_id?: string;
-}
-
-export const useAuthStore = create<DataT>()(
-  persist(
-    (set) => ({
-      user: {},
-      token: null,
-      setUser: (user: UserT) => set({ user: user }),
-      setToken: (token: string) => set({ token }),
-    }),
-    {
-      name: "auth",
-    }
-  )
-);
+// export const useAuthStore = create<IAuthStoreData>()((set) => ({
+//   user: Cookie.get("user") ? JSON.parse(Cookie.get("user") as string) : null,
+//   token: null,
+//   isLogged: !!Cookie.get("accessToken"),
+//   logIn: ({ user, token }: { user: IUser; token: string }) => {
+//     Cookie.set("user", JSON.stringify(user), { expires: 1 / 24 });
+//     Cookie.set("accessToken", token, { expires: 1 / 24 });
+//     set({ user, token, isLogged: true });
+//   },
+//   loOut() {
+//     Cookie.remove("user");
+//     Cookie.remove("accessToken");
+//     set({ user: null, token: null, isLogged: false });
+//   },
+// }));
