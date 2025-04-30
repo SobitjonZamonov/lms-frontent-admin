@@ -1,193 +1,231 @@
-import { Layout, theme, Table, Tag, Space, Button } from 'antd';
-import ShareIcon from '../students/assets/shareIcon1';
-import SortIcon from '../students/assets/sortIcon';
-import AddStudent from '../students/assets/addstudentIcon';
-import React, { useState } from 'react';
-import type { TableColumnsType, TableProps } from 'antd';
-import Edit from '../students/assets/edit';
-import Delete from '../students/assets/delete';
-import { Link } from 'react-router-dom';
-import SidebarLayout from '../../components/layout/layout';
+import {
+  Button,
+  Col,
+  Pagination,
+  Row,
+  Table,
+  Tag,
+  Space,
+  Input,
+  Avatar
+} from "antd";
+import Title from "antd/es/typography/Title";
+//@ts-ignore
+import AddIconSvg from "../../assets/svg/add.icon.svg";
+//@ts-ignore
+import FilterSvg from "../../assets/svg/fillter.icon.svg";
+import { useGetTeachers } from "./service/query/useGetTeachersFilter";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import LoadingSpinner from "../../components/spin";
+import { useSearchStore } from "../../store/useSearchStore";
+import { SearchOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+import type { TableColumnsType } from 'antd';
 
-const { Content } = Layout;
+const { Search } = Input;
 
-type TableRowSelection<T extends object = object> = TableProps<T>['rowSelection'];
-
-interface DataType {
-    key: React.Key;
-    id: number;
-    fio: string;
-    birthDate: string;
-    gender: string;
-    kontakt: string;
+interface ITeacher {
+  user_id: string;
+  full_name: string;
+  data_of_birth: string;
+  gender: string;
+  phone_number: string;
+  images: { url: string }[];
 }
 
-const columns: TableColumnsType<DataType> = [
-    {
-        title: '#',
-        dataIndex: 'id',
-        width: 50,
-        align: 'center',
-    },
-    {
-        title: 'O\'qituvchilar F.I.O',
-        dataIndex: 'fio',
-        width: 200,
-    },
-    {
-        title: 'Tug\'ilgan sana',
-        dataIndex: 'birthDate',
-        width: 120,
-        align: 'center',
-    },
-    {
-        title: 'Jinsi',
-        dataIndex: 'gender',
-        width: 100,
-        align: 'center',
-        render: (gender) => (
-            <Tag color={gender === 'Qiz' ? 'pink' : 'blue'}>{gender}</Tag>
-        ),
-    },
-    {
-        title: 'Kontakt',
-        dataIndex: 'kontakt',
-        width: '225px',
-        align: 'center'
-    },
-    {
-        title: 'Imkoniyatlar',
-        key: 'actions',
-        width: 150,
-        align: 'center',
-        render: (_, record) => (
-            <Space size="small">
-                <Button
-                    type="link"
-                    size="small"
-                    style={{
-                        border: '1px solid #DDDD',
-                        borderRadius: "50%",
-                        width: "36px",
-                        height: "36px"
-                    }}
-                ><Edit /></Button>
-                <Button type="link" size="small" danger><Delete /></Button>
-            </Space>
-        ),
-    },
-];
-
-const dataSource: DataType[] = [
-    {
-        key: 1,
-        id: 1,
-        fio: 'Qodirov Azizbek',
-        birthDate: '05.05.1985',
-        gender: 'O\'g\'il',
-        kontakt: '+998 (93) 123-45-67'
-    },
-    {
-        key: 2,
-        id: 2,
-        fio: 'Karimova Zuhra',
-        birthDate: '15.03.1980',
-        gender: 'Qiz',
-        kontakt: '+998 (93) 123-45-67'
-    },
-    {
-        key: 3,
-        id: 3,
-        fio: 'Nosirov Jasur',
-        birthDate: '22.07.1975',
-        gender: 'O\'g\'il',
-        kontakt: '+998 (93) 123-45-67'
-    },
-    {
-        key: 4,
-        id: 4,
-        fio: 'Olimova Sarvinoz',
-        birthDate: '10.01.1982',
-        gender: 'Qiz',
-        kontakt: '+998 (93) 123-45-67'
-    },
-    {
-        key: 5,
-        id: 5,
-        fio: 'Yusupov Sardor',
-        birthDate: '30.11.1978',
-        gender: 'O\'g\'il',
-        kontakt: '+998 (93) 123-45-67'
-    },
-];
-
 const Teachers = () => {
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
+  const navigate = useNavigate();
+  const [page, setPage] = useState<number>(1);
+  const { search } = useSearchStore();
+  const { data, isLoading } = useGetTeachers(page, 10, undefined, undefined, search);
+  const [isFilter, setFilter] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const columns: TableColumnsType<ITeacher> = [
+    {
+      title: '#',
+      dataIndex: 'index',
+      key: 'index',
+      width: 60,
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: 'O’qituvchilar F.I.O',
+      dataIndex: 'full_name',
+      key: 'full_name',
+      render: (text, record) => (
+        <Space>
+          <Avatar src={record.images[0]?.url} />
+          <span style={{ fontFamily: "var(--font-family)" }}>{text}</span>
+        </Space>
+      ),
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
+        <div style={{ padding: 8 }}>
+          <Search
+            placeholder="Qidiruv..."
+            value={selectedKeys[0]}
+            onChange={(e) => {
+              setSelectedKeys(e.target.value ? [e.target.value] : []);
+              setSearchText(e.target.value);
+            }}
+            onSearch={() => confirm()}
+            style={{ width: 200 }}
+          />
+        </div>
+      ),
+      filterIcon: (filtered) => (
+        <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />
+      ),
+    },
+    {
+      title: 'Tug’ilgan sana',
+      dataIndex: 'data_of_birth',
+      key: 'data_of_birth',
+      render: (date) => dayjs(date).format('DD-MM-YYYY'),
+      sorter: (a, b) => dayjs(a.data_of_birth).unix() - dayjs(b.data_of_birth).unix(),
+    },
+    {
+      title: 'Jinsi',
+      dataIndex: 'gender',
+      key: 'gender',
+      render: (gender) => (
+        <Tag color={gender === 'MALE' ? 'blue' : 'pink'}>
+          {gender === 'MALE' ? 'Erkak' : 'Ayol'}
+        </Tag>
+      ),
+      filters: [
+        { text: 'Erkak', value: 'MALE' },
+        { text: 'Ayol', value: 'FEMALE' },
+      ],
+      onFilter: (value, record) => record.gender === value,
+    },
+    {
+      title: 'Kontakt',
+      dataIndex: 'phone_number',
+      key: 'phone_number',
+      render: (phone) => phone || '-',
+    },
+    {
+      title: 'Imkoniyatlar',
+      key: 'action',
+      render: (_, record) => (
+        <Space size="middle">
+          <Button onClick={() => navigate(`/teacher/${record.user_id}`)}>
+            i
+          </Button>
+          <Button>
+            <DeleteOutlined style={{ color: 'red', fontSize: '18px' }} />
+          </Button>
+          <Button>
+            <EditOutlined style={{ color: '#1890ff', fontSize: '18px' }} />
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
-    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-        console.log('selectedRowKeys changed: ', newSelectedRowKeys);
-        setSelectedRowKeys(newSelectedRowKeys);
-    };
+  return (
+    <>
+      <Row
+        style={{
+          padding: "22px 20px 15px 20px",
+          borderBottom: "1px solid var(--qidiruv-tizimi-1)",
+          justifyContent: "space-between",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontWeight: 600,
+            fontSize: "26px",
+            color: "var(--matn-rang-1)",
+            fontFamily: "var(--font-family)",
+            margin: 0,
+          }}
+        >
+          O’qituvchilar jadvali
+        </Title>
+        <Row style={{ gap: "15px", alignItems: "center" }}>
+          <Button
+            onClick={() => navigate("/teacher/create")}
+            style={{
+              display: "flex",
+              gap: "10px",
+              padding: "18px 20px",
+              fontFamily: " var(--font-family)",
+              fontWeight: 500,
+              fontSize: "16px",
+              color: "var(--breand-rang-2)",
+              border: "1px solid var(--qidiruv-tizimi-1)",
+              borderRadius: "4px",
+              boxShadow: "2px 2px 2px 0 rgba(0, 0, 0, 0.1)",
+              background: "var(--stroka-rang-2)",
+            }}
+          >
+            <img src={AddIconSvg} alt="" />
+            Qo'shish
+          </Button>
+          <Col style={{ position: "relative", display: "inline-block" }}>
+            <Button
+              onClick={() => setFilter(!isFilter)}
+              style={{
+                padding: "18px 8px",
+                border: "1px solid var(--qidiruv-tizimi-1)",
+                borderRadius: "4px",
+                boxShadow: "2px 2px 2px 0 rgba(0, 0, 0, 0.1)",
+                background: "var(--stroka-rang-2)",
+              }}
+            >
+              <img src={FilterSvg} alt="" />
+            </Button>
+          </Col>
+        </Row>
+      </Row>
 
-    const rowSelection: TableRowSelection<DataType> = {
-        selectedRowKeys,
-        onChange: onSelectChange,
-    };
+      {isLoading ? (
+        <Row
+          style={{
+            height: "600px",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <LoadingSpinner />
+        </Row>
+      ) : (
+        <div style={{ padding: "20px" }}>
+          <Table
+            columns={columns}
+            dataSource={data?.data.map((item) => ({ ...item, key: item.user_id }))}
+            pagination={false}
+            style={{
+              fontFamily: "var(--font-family)",
+              borderRadius: "4px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }}
+            scroll={{ x: true }}
+          />
 
-    return (
-        <Layout>
-            <SidebarLayout />
-            <Content style={{
-                marginLeft: 250, // Sidebar kengligiga teng bo'lishi kerak
-                padding: '24px',
-                minHeight: '100vh',
-                marginTop: '-630px'
-            }}>
-                <div
-                    style={{
-                        background: colorBgContainer,
-                        minHeight: '80vh',
-                        padding: 24,
-                        borderRadius: borderRadiusLG,
-                    }}
-                >
-                    <div className='w-full h-[50px] flex justify-between border-b-2 border-[#DDDD]'>
-                        <h1 className='font-semibold text-[26px] text-[#1C274C]'>O'qituvchilar jadvali</h1>
-                        <div className='flex gap-3.5'>
-                            <Link to="/teachers/add">
-                                <button className='border-2 w-[136px] h-[36px] rounded-[4px] border-[#DDDD] cursor-pointer flex justify-center items-center gap-3 font-medium text-[16px] text-[#3AADA8] hover:bg-[#DDD4]'>
-                                    <AddStudent />Qo'shish
-                                </button>
-                            </Link>
-
-                            <button className='border-2 w-[36px] h-[36px] rounded-[4px] border-[#DDDD] cursor-pointer flex justify-center items-center hover:bg-[#DDD4]'><ShareIcon /></button>
-                            <button className='border-2 w-[36px] h-[36px] rounded-[4px] border-[#DDDD] cursor-pointer flex justify-center items-center hover:bg-[#DDD4]'><SortIcon /></button>
-                        </div>
-                    </div>
-
-                    <div style={{ marginTop: 30 }}>
-                        <Table
-                            rowSelection={rowSelection}
-                            columns={columns}
-                            dataSource={dataSource}
-                            bordered
-                            size="middle"
-                            pagination={{
-                                pageSize: 10,
-                                showSizeChanger: false,
-                                showTotal: (total) => `Jami ${total} ta o'qituvchi`,
-                            }}
-                            scroll={{ x: 'max-content' }}
-                        />
-                    </div>
-                </div>
-            </Content>
-        </Layout>
-    );
+          <Row
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              padding: "30px 0px 10px 0px",
+            }}
+          >
+            <Pagination
+              current={page}
+              total={data?.meta?.teacherCount}
+              pageSize={10}
+              onChange={(page) => setPage(page)}
+              showSizeChanger={false}
+            />
+          </Row>
+        </div>
+      )}
+    </>
+  );
 };
 
 export default Teachers;

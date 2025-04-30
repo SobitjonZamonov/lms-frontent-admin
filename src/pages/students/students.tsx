@@ -1,227 +1,295 @@
-import { Layout, theme, Table, Tag, Space, Button } from 'antd';
-import ShareIcon from './assets/shareIcon1';
-import SortIcon from './assets/sortIcon';
-import AddStudent from './assets/addstudentIcon';
-import React, { useState } from 'react';
-import type { TableColumnsType, TableProps } from 'antd';
-import Edit from './assets/edit';
-import Delete from './assets/delete';
-import { Link } from 'react-router-dom';
-import SidebarLayout from '../../components/layout/layout';
+import {
+  Button,
+  Col,
+  Row,
+  Table,
+  Input,
+  Space
+} from "antd";
+import Title from "antd/es/typography/Title";
+import { SearchOutlined } from '@ant-design/icons';
+import { EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined } from '@ant-design/icons';
+import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
+import type { FilterDropdownProps } from 'antd/es/table/interface';
+import Highlighter from 'react-highlight-words';
+//@ts-ignore
+import AddIconSvg from "../../assets/svg/add.icon.svg";
+//@ts-ignore
+import FilterSvg from "../../assets/svg/fillter.icon.svg";
+//@ts-ignore
+import CloseIcon from "../../assets/svg/close.icon.svg";
+import useGetAllStudent from "./service/query/useGetAllStudent";
+import { useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
+import { useSearchStore } from "../../store/useSearchStore";
+import LoadingSpinner from "../../components/spin";
 
-const { Content } = Layout;
-
-type TableRowSelection<T extends object = object> = TableProps<T>['rowSelection'];
-
-interface DataType {
-    key: React.Key;
-    id: number;
-    fio: string;
-    birthDate: string;
-    gender: string;
-    groupNumber: string;
-    attendance: string;
-    payment: string;
+interface IFilter {
+  data_of_birth?: string;
+  gender?: string;
+  groupId?: string;
+  fullname?: string;
 }
 
-const columns: TableColumnsType<DataType> = [
-    {
-        title: '#',
-        dataIndex: 'id',
-        width: 50,
-        align: 'center',
-    },
-    {
-        title: 'Bolalar F.I.O',
-        dataIndex: 'fio',
-        width: 200,
-    },
-    {
-        title: 'Tug\'ilgan sana',
-        dataIndex: 'birthDate',
-        width: 120,
-        align: 'center',
-    },
-    {
-        title: 'Jinsi',
-        dataIndex: 'gender',
-        width: 100,
-        align: 'center',
-        render: (gender) => (
-            <Tag color={gender === 'Qiz' ? 'pink' : 'blue'}>{gender}</Tag>
-        ),
-    },
-    {
-        title: 'Gurux raqami',
-        dataIndex: 'groupNumber',
-        width: 120,
-        align: 'center',
-    },
-    {
-        title: 'Davomat',
-        dataIndex: 'attendance',
-        width: 100,
-        align: 'center',
-        render: (attendance) => (
-            <Tag color={attendance === 'Bor' ? 'green' : 'red'}>
-                {attendance}
-            </Tag>
-        ),
-    },
-    {
-        title: 'To\'lov',
-        dataIndex: 'payment',
-        width: 100,
-        align: 'center',
-        render: (payment) => (
-            <Tag color={payment === 'To\'langan' ? 'green' : 'red'}>
-                {payment}
-            </Tag>
-        ),
-    },
-    {
-        title: 'Imkonyatlar',
-        key: 'actions',
-        width: 150,
-        align: 'center',
-        render: (_, record) => (
-            <Space size="small">
-                <Button
-                    type="link"
-                    size="small"
-                    style={{
-                        border: '1px solid #DDDD',
-                        borderRadius: "50%",
-                        width: "36px",
-                        height: "36px"
-                    }}
-                ><Edit /></Button>
-                <Button type="link" size="small" danger><Delete /></Button>
-            </Space>
-        ),
-    },
-];
-
-const dataSource: DataType[] = [
-    {
-        key: 1,
-        id: 1,
-        fio: 'Qodirov Azizbek',
-        birthDate: '05.05.2021',
-        gender: 'O\'g\'il',
-        groupNumber: '1-guruh',
-        attendance: 'Bor',
-        payment: 'To\'langan',
-    },
-    {
-        key: 2,
-        id: 2,
-        fio: 'Karimova Zuhra',
-        birthDate: '15.03.2021',
-        gender: 'Qiz',
-        groupNumber: '1-guruh',
-        attendance: 'Bor',
-        payment: 'To\'langan',
-    },
-    {
-        key: 3,
-        id: 3,
-        fio: 'Nosirov Jasur',
-        birthDate: '22.07.2021',
-        gender: 'O\'g\'il',
-        groupNumber: '2-guruh',
-        attendance: 'Yo\'q',
-        payment: 'To\'lanmagan',
-    },
-    {
-        key: 4,
-        id: 4,
-        fio: 'Olimova Sarvinoz',
-        birthDate: '10.01.2021',
-        gender: 'Qiz',
-        groupNumber: '2-guruh',
-        attendance: 'Bor',
-        payment: 'To\'langan',
-    },
-    {
-        key: 5,
-        id: 5,
-        fio: 'Yusupov Sardor',
-        birthDate: '30.11.2021',
-        gender: 'O\'g\'il',
-        groupNumber: '1-guruh',
-        attendance: 'Yo\'q',
-        payment: 'To\'lanmagan',
-    },
-];
-
 const Students = () => {
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
+  const [page, setPage] = useState<number>(1);
+  const [isFilterQuery] = useState<IFilter | null>(null);
+  const { search } = useSearchStore();
+  const { data, isLoading } = useGetAllStudent(
+    page,
+    10,
+    isFilterQuery?.data_of_birth,
+    isFilterQuery?.gender,
+    isFilterQuery?.groupId,
+    search
+  );
+  const [isFilter, setFilter] = useState(false);
+  const navigate = useNavigate();
 
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  // Search functionality for table
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef<InputRef>(null);
 
-    const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-        console.log('selectedRowKeys changed: ', newSelectedRowKeys);
-        setSelectedRowKeys(newSelectedRowKeys);
-    };
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps['confirm'],
+    dataIndex: string,
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
 
-    const rowSelection: TableRowSelection<DataType> = {
-        selectedRowKeys,
-        onChange: onSelectChange,
-    };
+  const handleReset = (clearFilters: () => void) => {
+    clearFilters();
+    setSearchText('');
+  };
 
-    return (
-        <Layout>
-            <SidebarLayout />
-            <Content style={{
-                marginLeft: 250, // Sidebar kengligiga teng bo'lishi kerak
-                padding: '24px',
-                minHeight: '100vh',
-                marginTop: "-630px"
-            }}>
-                <div
-                    style={{
-                        background: colorBgContainer,
-                        minHeight: '80vh',
-                        padding: 24,
-                        borderRadius: borderRadiusLG,
-                    }}
-                >
-                    <div className='w-full h-[50px] flex justify-between border-b-2 border-[#DDDD]'>
-                        <h1 className='font-semibold text-[26px] text-[#1C274C]'>O'quvchilar jadvali</h1>
-                        <div className='flex gap-3.5'>
-                            <Link to="/students/add">
-                                <button className='border-2 w-[136px] h-[36px] rounded-[4px] border-[#DDDD] cursor-pointer flex justify-center items-center gap-3 font-medium text-[16px] text-[#3AADA8] hover:bg-[#DDD4]'>
-                                    <AddStudent />Qo'shish
-                                </button>
-                            </Link>
+  const getColumnSearchProps = (dataIndex: string): TableColumnType<any> => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+          style={{ marginBottom: 8, display: 'block' }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({ closeDropdown: false });
+              setSearchText((selectedKeys as string[])[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            Close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex]
+        ?.toString()
+        .toLowerCase()
+        .includes((value as string).toLowerCase()),
+    render: (text) =>
+      searchedColumn === dataIndex ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ''}
+        />
+      ) : (
+        text
+      ),
+  });
 
-                            <button className='border-2 w-[36px] h-[36px] rounded-[4px] border-[#DDDD] cursor-pointer flex justify-center items-center hover:bg-[#DDD4]'><ShareIcon /></button>
-                            <button className='border-2 w-[36px] h-[36px] rounded-[4px] border-[#DDDD] cursor-pointer flex justify-center items-center hover:bg-[#DDD4]'><SortIcon /></button>
-                        </div>
-                    </div>
+  const columns: TableColumnsType<any> = [
+    {
+      title: '#',
+      dataIndex: 'index',
+      key: 'index',
+      render: (_, __, index) => (page - 1) * 10 + index + 1,
+    },
+    {
+      title: "O'quvchi F.I.O",
+      dataIndex: 'full_name',
+      key: 'full_name',
+      ...getColumnSearchProps('full_name'),
+    },
+    {
+      title: "Tug'ilgan sana",
+      dataIndex: 'data_of_birth',
+      key: 'data_of_birth',
+      ...getColumnSearchProps('data_of_birth'),
+    },
+    {
+      title: "Jinsi",
+      dataIndex: 'gender',
+      key: 'gender',
+      render: (gender) => gender === 'MALE' ? 'Og\'il bola' : 'Qiz bola',
+      filters: [
+        { text: 'Og\'il bola', value: 'MALE' },
+        { text: 'Qiz bola', value: 'FEMALE' },
+      ],
+      onFilter: (value, record) => record.gender === value,
+    },
+    {
+      title: "Guruh raqami",
+      dataIndex: ['group_members', '0', 'group', 'name'],
+      key: 'group',
+      ...getColumnSearchProps('group'),
+    },
+    {
+      title: "To'lov",
+      dataIndex: ['PaymentForStudent', '0', 'type'],
+      key: 'payment',
+      render: (_, record) =>
+        record.PaymentForStudent?.[0]?.type
+          ? `${record.PaymentForStudent[0].type} (${record.PaymentForStudent[0].sum})`
+          : "Naxt"
+    },
+    {
+      title: "Amallar",
+      key: 'actions',
+      render: (_, record) => (
+        <Space size="middle">
+          <Button onClick={() => navigate(`/student/about/${record.user_id}`)}>
+            i
+          </Button>
+          <Button>
+            <DeleteOutlined style={{ color: 'red', fontSize: '18px' }} />
+          </Button>
+          <Button>
+            <EditOutlined style={{ color: '#1890ff', fontSize: '18px' }} />
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
-                    <div style={{ marginTop: 30 }}>
-                        <Table
-                            rowSelection={rowSelection}
-                            columns={columns}
-                            dataSource={dataSource}
-                            bordered
-                            size="middle"
-                            pagination={{
-                                pageSize: 10,
-                                showSizeChanger: false,
-                                showTotal: (total) => `Jami ${total} ta o'quvchi`,
-                            }}
-                            scroll={{ x: 'max-content' }}
-                        />
-                    </div>
-                </div>
-            </Content>
-        </Layout>
-    );
+  return (
+    <>
+      <Row
+        style={{
+          padding: "22px 20px 15px 20px",
+          borderBottom: "2px solid #DDDD",
+          justifyContent: "space-between",
+        }}
+      >
+        <Title
+          level={2}
+          style={{
+            fontWeight: 600,
+            fontSize: "26px",
+            margin: 0,
+          }}
+        >
+          O'quvchilar jadvali
+        </Title>
+        <Row style={{ gap: "15px", alignItems: "center" }}>
+          <Button
+            onClick={() => navigate("/student/create")}
+            style={{
+              display: "flex",
+              gap: "10px",
+              padding: "18px 20px",
+              fontWeight: 500,
+              fontSize: "16px",
+              border: "2px solid #DDDD",
+              borderRadius: "4px",
+              boxShadow: "2px 2px 2px 0 rgba(0, 0, 0, 0.1)",
+              background: "var(--stroka-rang-2)",
+            }}
+          >
+            <img src={AddIconSvg} alt="" />
+            Qo'shish
+          </Button>
+          <Col
+            style={{
+              position: "relative",
+              display: "inline-block",
+            }}
+          >
+            <Button
+              onClick={() => (isFilter ? setFilter(false) : setFilter(true))}
+              style={{
+                padding: "18px 8px",
+                border: " 2px solid #DDDD",
+                borderRadius: "4px",
+                boxShadow: "2px 2px 2px 0 rgba(0, 0, 0, 0.1)",
+                background: "var(--stroka-rang-2)",
+              }}
+            >
+              <img src={FilterSvg} alt="" />
+            </Button>
+          </Col>
+        </Row>
+      </Row>
+
+      {isLoading ? (
+        <Row
+          style={{
+            height: "600px",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <LoadingSpinner />
+        </Row>
+      ) : (
+        <div style={{ padding: "20px" }}>
+          <Table
+            columns={columns}
+            dataSource={data?.data}
+            pagination={{
+              position: ['bottomCenter'],
+              current: page,
+              total: data?.meta.studentCount,
+              pageSize: 10,
+              onChange: (page) => setPage(page),
+            }}
+            rowKey="user_id"
+          />
+        </div>
+      )}
+    </>
+  );
 };
 
 export default Students;

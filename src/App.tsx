@@ -1,18 +1,30 @@
-import { Route, Routes } from "react-router-dom"
-import { routes } from "./routes"
+import { Route, Routes } from "react-router-dom";
+import { routes } from "./routes";
 
-const App = () => {
+function App() {
   return (
-    <Routes>
-      {routes.map((element, index) => {
-        return <Route key={index} path={element.path} element={element.element}>
-          {element.children?.map((item, childIndex) => {
-            return <Route key={childIndex} index={!item.path ? true : false} path={item.path} element={item.element} />
-          })}
-        </Route>
-      })}
-    </Routes>
-  )
+    <>
+      <Routes>
+        {routes.map((element, index) => (
+          <Route key={index} path={element.path} element={element.element}>
+            <Route
+              path={element.children?.path}
+              element={element.children?.element}
+            >
+              {element.children?.children?.map((childElement, childIndex) => (
+                <Route
+                  key={childIndex}
+                  index={!childElement.path ? true : false}
+                  path={childElement.path}
+                  element={childElement.element}
+                />
+              ))}
+            </Route>
+          </Route>
+        ))}
+      </Routes>
+    </>
+  );
 }
 
-export default App
+export default App;

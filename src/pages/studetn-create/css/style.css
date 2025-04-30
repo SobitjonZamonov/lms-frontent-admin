@@ -1,0 +1,32 @@
+.form_label__title {
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--matn-rang-1);
+}
+
+.form_input {
+  border: 1px solid var(--qidiruv-tizimi-1);
+  border-radius: 4px;
+  background: transparent;
+  width: 199px;
+  height: 45px;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--matn-rang-1);
+}
+.student-create-form .ant-input:hover,
+.student-create-form .ant-input:focus {
+  border-color: var(--breand-rang-2) !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  outline: none !important;
+}
+
+.student-create-form .ant-form-item {
+  margin: 0 !important;
+}
+.student-create-form .ant-form-item-label {
+  padding-bottom: 5px !important;
+}

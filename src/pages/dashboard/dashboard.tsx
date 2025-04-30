@@ -1,250 +1,313 @@
-import { Layout, theme, Input, Card, List, Typography, Avatar, Row, Col } from 'antd';
-import TableIcon from './assets/tablebuttonIcon';
-import { PieChart, Pie, Cell, Legend } from 'recharts';
-import Krimlar from './assets/kirimlar';
-import Chiqimlar from './assets/chiqimlar';
-import BolalarSoni from './assets/bolalarSoni';
-import SidebarLayout from '../../components/layout/layout';
+import { Button, Col, Dropdown, MenuProps, Row } from "antd";
+import Title from "antd/es/typography/Title";
+import { useState } from "react";
+// @ts-ignore
+import IncomeIcon from "../../assets/svg/Income.icon.svg"
+// @ts-ignore
+import OutecomeIcon from "../../assets/svg/outcome.icon.svg";
+// @ts-ignore
+import StudentCountIcon from "../../assets/svg/student.count.icon.svg";
+import "./css/style.css";
+// @ts-ignore
+import CategoryMenuIcon from "../../assets/svg/menu.category.icon.svg";
+import { UserCard } from "./components/UserCard";
+import { StatistikaCard } from "./components/StatistikaCard";
+import { useGetDashboard } from "./service/query/useGetDashboard";
+import TodayArrivedStudentsComponents from "./components/TodayArrivedStudentsComponents";
+import AgeDistributionComponents from "./components/AgeDistributionComponents";
+import { useSearchStore } from "../../store/useSearchStore";
+import LoadingSpinner from "../../components/spin";
 
-const { Content } = Layout;
-const { Title, Text } = Typography;
-
-const teachers = [
-    {
-        id: 1,
-        name: `Sultonov Shokirjon Tursinjon o\'g\'li`,
-        birthDate: '15.05.1996',
-        gender: 'O\'g\'il bola',
-        phone: '+998 (93) 123-45-67',
-        address: 'Toshkent.Sentr'
-    },
-    {
-        id: 2,
-        name: 'Nodirova Shodiya Tursinjon qizi',
-        birthDate: '15.05.1996',
-        gender: 'Qiz bola',
-        phone: '+998 (93) 123-45-67',
-        address: 'Toshkent.Sentr'
-    },
-    {
-        id: 3,
-        name: 'Sultonov Shokirjon Tursinjon o\'g\'li',
-        birthDate: '15.05.1996',
-        gender: 'O\'g\'il bola',
-        phone: '+998 (93) 123-45-67',
-        address: 'Toshkent.Sentr'
-    },
+const items: MenuProps["items"] = [
+  {
+    key: "1",
+    label: (
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://www.antgroup.com"
+      >
+        Teachers
+      </a>
+    ),
+  },
 ];
-
-const students = [
-    {
-        id: 1,
-        name: `Sultonov Shokirjon Tursinjon o\'g\'li`,
-        birthDate: '15.05.1996',
-        gender: 'O\'g\'il bola',
-    },
-    {
-        id: 2,
-        name: 'Nodirova Shodiya Tursinjon qizi',
-        birthDate: '15.05.1996',
-        gender: 'Qiz bola',
-    },
-    {
-        id: 3,
-        name: 'Sultonov Shokirjon Tursinjon o\'g\'li',
-        birthDate: '15.05.1996',
-        gender: 'O\'g\'il bola',
-    },
-    {
-        id: 4,
-        name: 'Sultonov Shokirjon Tursinjon o\'g\'li',
-        birthDate: '15.05.1996',
-        gender: 'O\'g\'il bola',
-    },
-];
-
-const data = [
-    { name: '0-1', value: 40 },
-    { name: '1-2', value: 24 },
-    { name: '2-3', value: 12 },
-    { name: '3-4', value: 10 },
-    { name: '4-5', value: 8 },
-    { name: '5-6', value: 4 },
-    { name: '6-7', value: 2 },
-];
-
-const COLORS = ['#00bcd4', '#4dd0e1', '#80deea', '#b2ebf2', '#e0f7fa', '#f44336', '#bbdefb'];
 
 const Dashboard = () => {
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
-
-    return (
-        <Layout>
-            <SidebarLayout />
-            <Content style={{
-                marginLeft: 250, // Sidebar kengligiga teng bo'lishi kerak
-                padding: '24px',
-                minHeight: '100vh',
-                marginTop: "-630px"
-            }}>
-                <div
-                    style={{
-                        background: colorBgContainer,
-                        minHeight: '80vh',
-                        padding: 24,
-                        borderRadius: borderRadiusLG,
-                    }}
+  const [category, setCategory] = useState("Hamma");
+  const { search } = useSearchStore();
+  const { data, isLoading } = useGetDashboard(
+    search,
+    category === "Hamma"
+      ? ""
+      : category === "O'qituvchilar"
+        ? "TEACHER"
+        : category === "O'quvchilar"
+          ? "STUDENT"
+          : ""
+  );
+  return (
+    <>
+      <Col
+        style={{
+          padding: "22px 20px 20px 20px",
+          borderBottom: "1px solid var(--qidiruv-tizimi-1)",
+        }}
+      >
+        {" "}
+        <Title
+          level={2}
+          style={{
+            fontWeight: 600,
+            fontSize: "26px",
+            color: "var(--matn-rang-1)",
+            fontFamily: "var(--font-family)",
+            margin: 0,
+          }}
+        >
+          {" "}
+          Asosiy bo’lim
+        </Title>
+      </Col>
+      <Col
+        style={{
+          padding: "40px 20px",
+          fontFamily: "var(--font-family)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+        }}
+      >
+        <Row style={{ width: "full", gap: "25px" }}>
+          <Col
+            style={{
+              background: "var(--oq-rang-1)",
+              border: "1px solid var(--qidiruv-tizimi-1)",
+              borderRadius: "4px",
+              width: "76%",
+            }}
+          >
+            <Row
+              justify={"space-between"}
+              style={{
+                padding: "20px",
+                borderBottom: "2px solid  var(--qidiruv-tizimi-1)",
+              }}
+            >
+              <Title
+                level={2}
+                style={{
+                  fontWeight: 400,
+                  fontSize: "26px",
+                  color: "var(--matn-rang-1)",
+                  fontFamily: "var(--font-family)",
+                  margin: 0,
+                }}
+              >
+                {" "}
+                {category} soni:{" "}
+                <span
+                  style={{
+                    fontSize: "22px",
+                    color: "var(--breand-rang-1)",
+                  }}
                 >
-                    <div className='w-full h-[50px] border-b-2 border-[#DDDD]'>
-                        <h1 className='font-semibold text-[26px] text-[#1C274C]'>Asosiy bo'lim</h1>
-                    </div>
+                  {data?.data?.userCount} ta
+                </span>
+              </Title>
 
-                    <Row gutter={[24, 24]} style={{ marginTop: 40 }}>
-                        {/* O'qituvchilar kartasi */}
-                        <Col xs={24} md={16}>
-                            <Card style={{ borderRadius: 4, width: "880px" }}>
-                                <div className="flex justify-between items-center mb-4">
-                                    <Title level={4} className="mb-0">O'qituvchilar soni: {teachers.length} ta</Title>
-                                    <div className='flex gap-2'>
-                                        <button className='flex justify-center items-center border w-[50px] h-[33px] rounded-[4px] border-[#DDDD] cursor-pointer'>
-                                            <TableIcon />
-                                        </button>
-                                        <button className='border w-[128px] h-[33px] rounded-[4px] border-[#DDDD] cursor-pointer'>O'qituvchilar</button>
-                                        <button className='border w-[128px] h-[33px] rounded-[4px] border-[#DDDD] cursor-pointer'>Tarbiyachilar</button>
-                                        <button className='border w-[128px] h-[33px] rounded-[4px] border-[#DDDD] cursor-pointer'>Ishchilar</button>
-                                    </div>
-                                </div>
+              <Row style={{ gap: "15px" }}>
+                <Dropdown menu={{ items }} placement="bottom">
+                  <Button style={{ padding: "0px 5px" }}>
+                    <img
+                      src={CategoryMenuIcon}
+                      style={{ width: "24px", height: "24px" }}
+                      alt=""
+                    />
+                  </Button>
+                </Dropdown>
 
-                                <List
-                                    itemLayout="vertical"
-                                    dataSource={teachers}
-                                    renderItem={(teacher) => (
-                                        <List.Item key={teacher.id} className='border border-[#DDDD] rounded-[4px]'>
-                                            <div className="flex items-center justify-start w-full pl-[5px]">
-                                                <div className='flex gap-[20px] justify-center items-center'>
-                                                    <Avatar
-                                                        size={50}
-                                                        src={`https://i.pravatar.cc/150?img=${teacher.id}`}
-                                                    />
-                                                    <Title level={5}>{teacher.name}</Title>
-                                                    <Text>{teacher.birthDate}</Text>
-                                                    <div className="flex gap-[10px]">
-                                                        <Text> {teacher.gender}</Text><br />
-                                                        <Text> {teacher.phone}</Text><br />
-                                                        <Text> {teacher.address}</Text>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </List.Item>
-                                    )}
-                                />
-                            </Card>
-                        </Col>
-
-                        {/* Statistikalar kartalari */}
-                        <Col xs={24} md={6} className='flex absolute left-[100px]'>
-                            <Card style={{ borderRadius: 4, marginBottom: 24 }}>
-                                <div className="flex justify-start items-center mb-4">
-                                    <div className='flex flex-col gap-2'>
-                                        <button className='w-[44px] h-[44px] border rounded-[4px] justify-center items-center flex border-[#DDDD]'><Krimlar /></button>
-                                        <label className='font-medium text-[16px] text-[#1C274C]'>Kirimlar</label>
-                                        <label className='font-normal text-[26px] text-[#1C274C]'>12 000 000 so'm</label>
-                                        <label className='font-normal text-[16px]'>Kechagi kunga nisbatan <span className='text-[#e13636]'>-30%</span></label>
-                                    </div>
-                                </div>
-                            </Card>
-
-                            <Card style={{ borderRadius: 4, marginBottom: 24 }}>
-                                <div className="flex justify-start items-center mb-4">
-                                    <div className='flex flex-col gap-2'>
-                                        <button className='w-[44px] h-[44px] border rounded-[4px] justify-center items-center flex border-[#DDDD]'><Chiqimlar /></button>
-                                        <label className='font-medium text-[16px] text-[#1C274C]'>Chiqimlar</label>
-                                        <label className='font-normal text-[26px] text-[#1C274C]'>12 000 000 so'm</label>
-                                        <label className='font-normal text-[16px]'>O'tgan haftaga nisbatan <span className='text-[#36e15e]'>+30%</span></label>
-                                    </div>
-                                </div>
-                            </Card>
-
-                            <Card style={{ borderRadius: 4 }}>
-                                <div className="flex justify-start items-center mb-4">
-                                    <div className='flex flex-col gap-2'>
-                                        <button className='w-[44px] h-[44px] border rounded-[4px] justify-center items-center flex border-[#DDDD]'><BolalarSoni /></button>
-                                        <label className='font-medium text-[16px] text-[#1C274C]'>Bolalar soni</label>
-                                        <label className='font-normal text-[26px] text-[#1C274C]'>{students.length} ta</label>
-                                        <label className='font-normal text-[16px]'>O'tgan oyga nisbatan<span className='text-[#36e15e]'>+30%</span></label>
-                                    </div>
-                                </div>
-                            </Card>
-                        </Col>
-                    </Row>
-
-                    <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
-                        {/* Bugun kelgan bolalar */}
-                        <Col xs={24} md={10}>
-                            <Card style={{ borderRadius: 4, position: 'absolute', top: '-400px' }}>
-                                <div className="flex justify-between items-center mb-4">
-                                    <Title level={4} className="mb-0">Bugun kelgan <br />bolalar soni: {students.length}</Title>
-                                    <div className='flex gap-2'>
-                                        <label>Sana: </label>
-                                        <Input placeholder="11.05.2024" disabled />
-                                    </div>
-                                </div>
-
-                                <List
-                                    itemLayout="vertical"
-                                    dataSource={students}
-                                    renderItem={(student) => (
-                                        <List.Item key={student.id} className='border border-[#DDDD] rounded-[4px]'>
-                                            <div className="flex items-center justify-start w-full pl-[5px]">
-                                                <div className='flex gap-[20px] justify-center items-center'>
-                                                    <Avatar
-                                                        size={50}
-                                                        src={`https://i.pravatar.cc/150?img=${student.id}`}
-                                                    />
-                                                    <Title level={5}>{student.name}</Title>
-                                                    <div className="flex gap-[10px]">
-                                                        <Text> {student.gender}</Text>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </List.Item>
-                                    )}
-                                />
-                            </Card>
-                        </Col>
-
-                        {/* Bolalar statistikasi */}
-                        <Col>
-                            <Card style={{ borderRadius: 4, height: '400px', position: 'absolute', top: '-390px', right: '-360px' }}>
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="font-normal text-[26px] text-[#1C274C]">Bolalarni yosh <br />bo'yicha statistikasi</h2>
-                                    <span className="font-normal text-[50px] text-[#8AC5C2]">100%</span>
-                                </div>
-                                <PieChart width={300} height={300}>
-                                    <Pie
-                                        data={data}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={100}
-                                        paddingAngle={2}
-                                        dataKey="value"
-                                    >
-                                        {data.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Legend layout="vertical" align="right" verticalAlign="middle" />
-                                </PieChart>
-                            </Card>
-                        </Col>
-                    </Row>
-                </div>
-            </Content>
-        </Layout>
-    );
+                {["Hamma", "O’qituvchilar", "O’quvchilar"].map(
+                  (item, index) => (
+                    <Button
+                      key={index}
+                      onClick={() => setCategory(item)}
+                      style={{
+                        fontWeight: 500,
+                        padding: "0px 20px",
+                        fontSize: "16px",
+                        color:
+                          category === item
+                            ? "var(--breand-rang-2)"
+                            : "var(--matn-rang-1)",
+                        boxShadow:
+                          category === item
+                            ? "2px 2px 2px 0 rgba(0, 0, 0, 0.1)"
+                            : "none",
+                        background: "var(--stroka-rang-2)",
+                      }}
+                    >
+                      {item}
+                    </Button>
+                  )
+                )}
+              </Row>
+            </Row>
+            <Row
+              style={{
+                flexDirection: "column",
+                padding: "0px  20px",
+              }}
+            >
+              <Row
+                style={{
+                  background: "var(--oq-rang-1)",
+                  borderRadius: "4px",
+                  padding: "20px 15px",
+                  gap: "38px",
+                }}
+              >
+                <Row style={{ gap: "20px", width: "300px" }}>
+                  {["#", "O’qituvchilar F.I.O"].map((item, index) => (
+                    <Title
+                      key={index}
+                      level={2}
+                      style={{
+                        fontWeight: 500,
+                        fontSize: "16px",
+                        color: "var(--filter-matn-rang-1)",
+                        fontFamily: "var(--font-family)",
+                        margin: 0,
+                      }}
+                    >
+                      {item}
+                    </Title>
+                  ))}
+                </Row>
+                <Row style={{ gap: "99px" }}>
+                  <Row style={{ gap: "48px" }}>
+                    {["Tug’ilgan sana", "Jinsi"].map((item, index) => (
+                      <Title
+                        key={index}
+                        level={2}
+                        style={{
+                          fontWeight: 500,
+                          fontSize: "16px",
+                          color: "var(--filter-matn-rang-1)",
+                          fontFamily: "var(--font-family)",
+                          margin: 0,
+                        }}
+                      >
+                        {item}
+                      </Title>
+                    ))}
+                  </Row>
+                  <Row style={{ gap: "88px" }}>
+                    {["Kontakt", "Yashash manzil"].map((item, index) => (
+                      <Title
+                        key={index}
+                        level={2}
+                        style={{
+                          fontWeight: 500,
+                          fontSize: "16px",
+                          color: "var(--filter-matn-rang-1)",
+                          fontFamily: "var(--font-family)",
+                          margin: 0,
+                        }}
+                      >
+                        {item}
+                      </Title>
+                    ))}
+                  </Row>
+                </Row>
+              </Row>
+              {isLoading ? (
+                <Col
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "225px",
+                  }}
+                >
+                  <LoadingSpinner />
+                </Col>
+              ) : (
+                <Col
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "15px",
+                    height: "225px",
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                    paddingRight: "10px",
+                  }}
+                  className="custom-scroll"
+                >
+                  {data?.data?.users?.map((items, index) => (
+                    <UserCard
+                      key={items.user_id}
+                      id={index + 1}
+                      avatar={items?.images[0]?.url}
+                      fullname={items?.full_name}
+                      birthDate={items?.data_of_birth}
+                      gender={items?.gender}
+                      phoneNumber={items?.phone_number}
+                      address={items?.address}
+                    />
+                  ))}
+                </Col>
+              )}
+            </Row>
+          </Col>
+          <Col
+            style={{
+              width: "22%",
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px",
+            }}
+          >
+            <StatistikaCard
+              title={"Kirimlar"}
+              icon={IncomeIcon}
+              price={data?.data?.income?.sum}
+              procent={data?.data?.income?.percent}
+            />
+            <StatistikaCard
+              title={"Chiqimlar"}
+              icon={OutecomeIcon}
+              price={data?.data?.cost?.sum}
+              procent={data?.data?.cost?.percent}
+            />
+          </Col>
+        </Row>
+        <Row style={{ width: "full", gap: "25px" }}>
+          <Row style={{ gap: "20px", width: "76%" }}>
+            <TodayArrivedStudentsComponents />
+            <AgeDistributionComponents ageStats={data?.data?.ageStats} />
+          </Row>
+          <Col
+            style={{
+              width: "22%",
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px",
+            }}
+          >
+            <StatistikaCard
+              title={"Bolalar soni"}
+              icon={StudentCountIcon}
+              studentCount={data?.data?.studentCount}
+              procent={30}
+            />
+          </Col>
+        </Row>
+      </Col>
+    </>
+  );
 };
 
 export default Dashboard;

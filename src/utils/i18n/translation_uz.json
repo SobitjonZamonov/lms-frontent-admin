@@ -1,0 +1,16 @@
+{
+    "settings": {
+        "title": "Sozlamalar",
+        "faceId": "Face ID",
+        "apiId": "Api ID",
+        "apiHash": "Api HASH"
+    },
+    "menu": {
+        "dashboard": "Asosiy",
+        "students": "O’quvchilar",
+        "teachers": "O’qituvchilar",
+        "groups": "Guruhlar",
+        "courses": "Kurslar",
+        "settings": "Sozlamalar"
+    }
+}

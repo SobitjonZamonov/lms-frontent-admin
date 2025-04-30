@@ -1,0 +1,16 @@
+{
+    "settings": {
+        "title": "Settings",
+        "faceId": "Face ID",
+        "apiId": "Api ID",
+        "apiHash": "Api HASH"
+    },
+    "menu": {
+        "dashboard": "Dashboard",
+        "students": "Students",
+        "teachers": "Teachers",
+        "groups": "Groups",
+        "courses": "Courses",
+        "settings": "Settings"
+    }
+}

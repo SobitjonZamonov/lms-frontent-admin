@@ -1,0 +1,14 @@
+.course-create-form .ant-input:hover,
+.course-create-form .ant-input:focus {
+  border-color: var(--breand-rang-2) !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  outline: none !important;
+}
+
+.course-create-form .ant-form-item {
+  margin: 0 !important;
+}
+.course-create-form .ant-form-item-label {
+  padding-bottom: 5px !important;
+}

@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-
-
-/* global.css yoki App.css faylingizga yozing */
 .ant-upload.ant-upload-select-picture-card {
     width: 400px !important;
     height: 250px !important;

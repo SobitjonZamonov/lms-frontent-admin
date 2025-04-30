@@ -1,0 +1,17 @@
+{
+    "settings": {
+      "title": "Настройки",
+      "faceId": "Лицевой ID",
+      "apiId": "Api ID",
+      "apiHash": "Api HASH"
+    },
+    "menu": {
+        "dashboard": "Главная",
+        "students": "Ученики",
+        "teachers": "Учителя",
+        "groups": "Группы",
+        "courses": "Курсы",
+        "settings": "Настройки"
+      }
+  }
+  
