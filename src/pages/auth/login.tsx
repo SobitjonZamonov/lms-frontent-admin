@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { Input, Button, Form } from "antd";
+import { Input, Button, Form, Typography } from "antd";
 import { usePostLogin } from "./service/mutation/usePostLogin";
 import { useAuthStore } from "../../store/useAuthStore";
 import { IAuthResponse } from "../../utils";
 import { useEffect } from "react";
+
+const { Title } = Typography;
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,14 +21,18 @@ const Login = () => {
 
   const onFinish = (values: { login: string; password: string }) => {
     mutate(
-      { username: values.login.trim(), password: values.password.trim() },
+      {
+        username: values.login.trim(),
+        password: values.password.trim(),
+      },
       {
         onSuccess: (data: IAuthResponse) => {
           logIn({ user: data.user, token: data.data.accessToken });
           navigate("/dashboard", { replace: true });
         },
         onError: (error: any) => {
-          const errorMessage = error.response?.data?.message || "Login yoki parol xato!";
+          const errorMessage =
+            error.response?.data?.message || "Login yoki parol xato!";
           form.setFields([
             {
               name: "login",
@@ -43,41 +49,58 @@ const Login = () => {
   };
 
   return (
-    <div className="flex w-[1200px] h-[690px] justify-center items-center ml-[150px]">
-      <div className="flex flex-col justify-center items-center w-[450px] h-[400px] gap-[40px]">
-        <h1 className="font-medium text-[32px] text-center text-[#0e1427]">
+    <div
+      style={{
+        width: "100%",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "#f0f2f5",
+      }}
+    >
+      <div
+        style={{
+          width: 400,
+          padding: 40,
+          background: "#fff",
+          borderRadius: 8,
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <Title level={2} style={{ textAlign: "center", marginBottom: 32 }}>
           Tizimga kirish
-        </h1>
+        </Title>
         <Form
           form={form}
           name="login-form"
-          onFinish={onFinish}
           layout="vertical"
-          style={{ width: "100%" }}
+          onFinish={onFinish}
         >
           <Form.Item
+            label="Login"
             name="login"
             rules={[{ required: true, message: "Loginni kiriting!" }]}
           >
-            <Input placeholder="Login" variant="underlined" />
+            <Input placeholder="Login" />
           </Form.Item>
+
           <Form.Item
+            label="Parol"
             name="password"
             rules={[{ required: true, message: "Parolni kiriting!" }]}
           >
-            <Input.Password placeholder="Parol" variant="underlined" />
+            <Input.Password placeholder="Parol" />
           </Form.Item>
+
           <Form.Item>
             <Button
+              type="primary"
               htmlType="submit"
               loading={isPending}
-              style={{
-                width: "450px",
-                height: "64px",
-                background: "#7d41ed",
-                fontSize: "18px",
-                color: "#fff"
-              }}
+              block
+              size="large"
+              style={{ background: "#7d41ed", borderColor: "#7d41ed" }}
             >
               Kirish
             </Button>
